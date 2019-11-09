@@ -23,6 +23,7 @@ func TestTodoServer(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
+		assertContentType(t, response, jsonContentType)
 
 		var todo Todo
 		err := json.NewDecoder(response.Body).Decode(&todo)
@@ -45,6 +46,12 @@ func newGetRequest(id string) *http.Request {
 func assertStatus(t *testing.T, got, want int) {
 	t.Helper()
 	if got != want {
-		t.Errorf("got %d want %d", got, want)
+	}
+}
+
+func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
+	t.Helper()
+	if response.Result().Header.Get("content-type") != want {
+		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
 	}
 }
