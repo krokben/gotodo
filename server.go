@@ -15,6 +15,7 @@ type Todo struct {
 
 type TodoStore interface {
 	GetTodo(id string) Todo
+	GetTodos() []Todo
 }
 
 type TodoServer struct {
@@ -28,14 +29,15 @@ func NewTodoServer(store TodoStore) *TodoServer {
 	s.store = store
 
 	router := http.NewServeMux()
-	router.Handle("/todos/", http.HandlerFunc(s.todosHandler))
+	router.Handle("/todos/", http.HandlerFunc(s.todoHandler))
+	router.Handle("/todos", http.HandlerFunc(s.todosHandler))
 
 	s.Handler = router
 
 	return s
 }
 
-func (s *TodoServer) todosHandler(w http.ResponseWriter, r *http.Request) {
+func (s *TodoServer) todoHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/todos/"):]
 
 	todo := s.store.GetTodo(id)
@@ -48,5 +50,13 @@ func (s *TodoServer) todosHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewEncoder(w).Encode(todo)
 	if err != nil {
 		log.Fatal("Could not encode Todo into JSON", err)
+	}
+}
+
+func (s *TodoServer) todosHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", jsonContentType)
+	err := json.NewEncoder(w).Encode(s.store.GetTodos())
+	if err != nil {
+		log.Fatal("Could not encode Todos into JSON", err)
 	}
 }

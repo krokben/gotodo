@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -13,11 +12,12 @@ func TestTodoServer(t *testing.T) {
 	server := NewTodoServer(&StubTodoStore{
 		[]Todo{
 			{"id1", "meet friend"},
+			{"id2", "buy snacks"},
 		},
 	})
 
-	t.Run("hello world", func(t *testing.T) {
-		request := newGetRequest("id1")
+	t.Run("GET todo", func(t *testing.T) {
+		request := newGetRequest("/todos/id1")
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
@@ -36,10 +36,34 @@ func TestTodoServer(t *testing.T) {
 			t.Errorf("got %v want %v", todo, want)
 		}
 	})
+
+	t.Run("GET todos", func(t *testing.T) {
+		request := newGetRequest("/todos")
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertStatus(t, response.Code, http.StatusOK)
+		assertContentType(t, response, jsonContentType)
+
+		var todos []Todo
+		err := json.NewDecoder(response.Body).Decode(&todos)
+		if err != nil {
+			t.Errorf("Decoding Todos JSON failed, %v", err)
+		}
+
+		want := []Todo{
+			{"id1", "meet friend"},
+			{"id2", "buy snacks"},
+		}
+		if !reflect.DeepEqual(todos, want) {
+			t.Errorf("got %v want %v", todos, want)
+		}
+	})
 }
 
-func newGetRequest(id string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/todos/%s", id), nil)
+func newGetRequest(endpoint string) *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
 	return req
 }
 

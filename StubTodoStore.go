@@ -15,3 +15,7 @@ func (s *StubTodoStore) GetTodo(id string) Todo {
 
 	return result
 }
+
+func (s *StubTodoStore) GetTodos() []Todo {
+	return s.todos
+}
