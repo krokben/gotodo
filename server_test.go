@@ -22,6 +22,8 @@ func TestTodoServer(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
+		assertStatus(t, response.Code, http.StatusOK)
+
 		var todo Todo
 		err := json.NewDecoder(response.Body).Decode(&todo)
 		if err != nil {
@@ -38,4 +40,11 @@ func TestTodoServer(t *testing.T) {
 func newGetRequest(id string) *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/todos/%s", id), nil)
 	return req
+}
+
+func assertStatus(t *testing.T, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
