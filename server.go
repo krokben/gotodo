@@ -16,6 +16,7 @@ type Todo struct {
 type TodoStore interface {
 	GetTodo(id string) Todo
 	GetTodos() []Todo
+	AddTodo(todo Todo)
 }
 
 type TodoServer struct {
@@ -54,9 +55,22 @@ func (s *TodoServer) todoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *TodoServer) todosHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", jsonContentType)
-	err := json.NewEncoder(w).Encode(s.store.GetTodos())
-	if err != nil {
-		log.Fatal("Could not encode Todos into JSON", err)
+	switch r.Method {
+	case http.MethodGet:
+		w.Header().Set("content-type", jsonContentType)
+		err := json.NewEncoder(w).Encode(s.store.GetTodos())
+		if err != nil {
+			log.Fatal("Could not encode Todos into JSON", err)
+		}
+	case http.MethodPost:
+		var todo Todo
+		err := json.NewDecoder(r.Body).Decode(&todo)
+		if err != nil {
+			log.Fatal("Could not decode JSON", err)
+		}
+
+		//s.store.AddTodo(todo)
+
+		w.WriteHeader(http.StatusAccepted)
 	}
 }

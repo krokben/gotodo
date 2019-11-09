@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -60,10 +61,31 @@ func TestTodoServer(t *testing.T) {
 			t.Errorf("got %v want %v", todos, want)
 		}
 	})
+
+	t.Run("POST todo", func(t *testing.T) {
+		request := newPostRequest(t, "/todos", Todo{"id3", "find keys"})
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertStatus(t, response.Code, http.StatusAccepted)
+	})
 }
 
 func newGetRequest(endpoint string) *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
+	return req
+}
+
+func newPostRequest(t *testing.T, endpoint string, data Todo) *http.Request {
+	t.Helper()
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		t.Errorf("Could not marshal data, %v", err)
+	}
+
+	req, _ := http.NewRequest(http.MethodPost, endpoint, bytes.NewReader(jsonData))
 	return req
 }
 

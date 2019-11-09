@@ -19,3 +19,7 @@ func (s *StubTodoStore) GetTodo(id string) Todo {
 func (s *StubTodoStore) GetTodos() []Todo {
 	return s.todos
 }
+
+func (s *StubTodoStore) AddTodo(todo Todo) {
+	s.todos = append(s.todos, todo)
+}
