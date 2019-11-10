@@ -11,8 +11,7 @@ type FileSystemTodoStore struct {
 func (f *FileSystemTodoStore) GetTodo(id string) Todo {
 	var result Todo
 
-	todos, _ := NewTodos(f.database)
-	for _, todo := range todos {
+	for _, todo := range f.GetTodos() {
 		if todo.Id == id {
 			result = todo
 		}
