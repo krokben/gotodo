@@ -69,7 +69,7 @@ func (s *TodoServer) todosHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal("Could not decode JSON", err)
 		}
 
-		//s.store.AddTodo(todo)
+		s.store.AddTodo(todo)
 
 		w.WriteHeader(http.StatusAccepted)
 	}
