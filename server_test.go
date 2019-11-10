@@ -77,7 +77,6 @@ func TestFilSystemTodoStore(t *testing.T) {
 		store := FileSystemTodoStore{database}
 
 		got := store.GetTodos()
-
 		want := []Todo{
 			{"id1", "meet friend"},
 			{"id2", "buy snacks"},
@@ -88,6 +87,20 @@ func TestFilSystemTodoStore(t *testing.T) {
 		// read again
 		gotAgain := store.GetTodos()
 		assertSlice(t, gotAgain, want)
+	})
+
+	t.Run("get todo from reader", func(t *testing.T) {
+		database := strings.NewReader(`[
+			{"id": "id1", "task": "meet friend"}]`)
+
+		store := FileSystemTodoStore{database}
+
+		got := store.GetTodo("id1")
+		want := Todo{"id1", "meet friend"}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
 	})
 }
 
@@ -127,5 +140,4 @@ func assertSlice(t *testing.T, got, want []Todo) {
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v", got, want)
 	}
-
 }
