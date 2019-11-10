@@ -3,16 +3,18 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
-	"strings"
 	"testing"
 )
 
 func TestTodoServer(t *testing.T) {
 	server := NewTodoServer(&StubTodoStore{
-		[]Todo{
+		Todos{
 			{"id1", "meet friend"},
 			{"id2", "buy snacks"},
 		},
@@ -50,7 +52,7 @@ func TestTodoServer(t *testing.T) {
 
 		got, _ := NewTodos(response.Body)
 
-		want := []Todo{
+		want := Todos{
 			{"id1", "meet friend"},
 			{"id2", "buy snacks"},
 		}
@@ -69,15 +71,16 @@ func TestTodoServer(t *testing.T) {
 }
 
 func TestFilSystemTodoStore(t *testing.T) {
-	t.Run("/todos from a reader", func(t *testing.T) {
-		database := strings.NewReader(`[
+	t.Run("GET todos", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, `[
 			{"id": "id1", "task": "meet friend"},
 			{"id": "id2", "task": "buy snacks"}]`)
+		defer cleanDatabase()
 
 		store := FileSystemTodoStore{database}
 
 		got := store.GetTodos()
-		want := []Todo{
+		want := Todos{
 			{"id1", "meet friend"},
 			{"id2", "buy snacks"},
 		}
@@ -89,14 +92,33 @@ func TestFilSystemTodoStore(t *testing.T) {
 		assertDeepEqual(t, gotAgain, want)
 	})
 
-	t.Run("get todo from reader", func(t *testing.T) {
-		database := strings.NewReader(`[
+	t.Run("GET todo", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, `[
 			{"id": "id1", "task": "meet friend"}]`)
+		defer cleanDatabase()
 
 		store := FileSystemTodoStore{database}
 
 		got := store.GetTodo("id1")
 		want := Todo{"id1", "meet friend"}
+
+		assertDeepEqual(t, got, want)
+	})
+
+	t.Run("POST then GET todo", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, `[
+			{"id": "id1", "task": "meet friend"}]`)
+		defer cleanDatabase()
+
+		store := FileSystemTodoStore{database}
+
+		store.AddTodo(Todo{"id7", "go home"})
+
+		got := store.GetTodos()
+		want := Todos{
+			{"id1", "meet friend"},
+			{"id7", "go home"},
+		}
 
 		assertDeepEqual(t, got, want)
 	})
@@ -138,4 +160,23 @@ func assertDeepEqual(t *testing.T, got, want interface{}) {
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v", got, want)
 	}
+}
+
+func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
+	t.Helper()
+
+	tmpfile, err := ioutil.TempFile("", "db")
+
+	if err != nil {
+		t.Fatalf("could not create temp file %v", err)
+	}
+
+	tmpfile.Write([]byte(initialData))
+
+	removeFile := func() {
+		tmpfile.Close()
+		os.Remove(tmpfile.Name())
+	}
+
+	return tmpfile, removeFile
 }

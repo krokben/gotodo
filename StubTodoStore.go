@@ -1,22 +1,14 @@
 package main
 
 type StubTodoStore struct {
-	todos []Todo
+	todos Todos
 }
 
 func (s *StubTodoStore) GetTodo(id string) Todo {
-	var result Todo
-
-	for _, todo := range s.todos {
-		if todo.Id == id {
-			result = todo
-		}
-	}
-
-	return result
+	return s.GetTodos().Find(id)
 }
 
-func (s *StubTodoStore) GetTodos() []Todo {
+func (s *StubTodoStore) GetTodos() Todos {
 	return s.todos
 }
 

@@ -8,14 +8,9 @@ import (
 
 const jsonContentType = "application/json"
 
-type Todo struct {
-	Id   string `json:"id"`
-	Task string `json:"task"`
-}
-
 type TodoStore interface {
 	GetTodo(id string) Todo
-	GetTodos() []Todo
+	GetTodos() Todos
 	AddTodo(todo Todo)
 }
 

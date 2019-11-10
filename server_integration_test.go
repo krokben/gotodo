@@ -21,13 +21,13 @@ func TestTodoServerIntegrationTest(t *testing.T) {
 		assertStatus(t, response.Code, http.StatusOK)
 		assertContentType(t, response, jsonContentType)
 
-		var todos []Todo
+		var todos Todos
 		err := json.NewDecoder(response.Body).Decode(&todos)
 		if err != nil {
 			t.Errorf("Decoding Todos JSON failed, %v", err)
 		}
 
-		want := []Todo{
+		want := Todos{
 			{"id1", "meet friend"},
 			{"id2", "buy snacks"},
 		}
