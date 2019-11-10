@@ -55,7 +55,7 @@ func TestTodoServer(t *testing.T) {
 			{"id2", "buy snacks"},
 		}
 
-		assertSlice(t, got, want)
+		assertDeepEqual(t, got, want)
 	})
 
 	t.Run("POST todo", func(t *testing.T) {
@@ -82,11 +82,11 @@ func TestFilSystemTodoStore(t *testing.T) {
 			{"id2", "buy snacks"},
 		}
 
-		assertSlice(t, got, want)
+		assertDeepEqual(t, got, want)
 
 		// read again
 		gotAgain := store.GetTodos()
-		assertSlice(t, gotAgain, want)
+		assertDeepEqual(t, gotAgain, want)
 	})
 
 	t.Run("get todo from reader", func(t *testing.T) {
@@ -98,9 +98,7 @@ func TestFilSystemTodoStore(t *testing.T) {
 		got := store.GetTodo("id1")
 		want := Todo{"id1", "meet friend"}
 
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("got %v want %v", got, want)
-		}
+		assertDeepEqual(t, got, want)
 	})
 }
 
@@ -135,7 +133,7 @@ func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want s
 	}
 }
 
-func assertSlice(t *testing.T, got, want []Todo) {
+func assertDeepEqual(t *testing.T, got, want interface{}) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v", got, want)
