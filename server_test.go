@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -47,19 +48,14 @@ func TestTodoServer(t *testing.T) {
 		assertStatus(t, response.Code, http.StatusOK)
 		assertContentType(t, response, jsonContentType)
 
-		var todos []Todo
-		err := json.NewDecoder(response.Body).Decode(&todos)
-		if err != nil {
-			t.Errorf("Decoding Todos JSON failed, %v", err)
-		}
+		got, _ := NewTodos(response.Body)
 
 		want := []Todo{
 			{"id1", "meet friend"},
 			{"id2", "buy snacks"},
 		}
-		if !reflect.DeepEqual(todos, want) {
-			t.Errorf("got %v want %v", todos, want)
-		}
+
+		assertSlice(t, got, want)
 	})
 
 	t.Run("POST todo", func(t *testing.T) {
@@ -69,6 +65,29 @@ func TestTodoServer(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusAccepted)
+	})
+}
+
+func TestFilSystemTodoStore(t *testing.T) {
+	t.Run("/todos from a reader", func(t *testing.T) {
+		database := strings.NewReader(`[
+			{"id": "id1", "task": "meet friend"},
+			{"id": "id2", "task": "buy snacks"}]`)
+
+		store := FileSystemTodoStore{database}
+
+		got := store.GetTodos()
+
+		want := []Todo{
+			{"id1", "meet friend"},
+			{"id2", "buy snacks"},
+		}
+
+		assertSlice(t, got, want)
+
+		// read again
+		gotAgain := store.GetTodos()
+		assertSlice(t, gotAgain, want)
 	})
 }
 
@@ -101,4 +120,12 @@ func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want s
 	if response.Result().Header.Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
 	}
+}
+
+func assertSlice(t *testing.T, got, want []Todo) {
+	t.Helper()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
+	}
+
 }
