@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -12,13 +13,17 @@ type FileSystemTodoStore struct {
 	todos    Todos
 }
 
-func NewFileSystemTodoStore(file *os.File) *FileSystemTodoStore {
+func NewFileSystemTodoStore(file *os.File) (*FileSystemTodoStore, error) {
 	file.Seek(0, 0)
-	todos, _ := NewTodos(file)
+	todos, err := NewTodos(file)
+	if err != nil {
+		return nil, fmt.Errorf("problem loading todo store from file %s, %v", file.Name(), err)
+	}
+
 	return &FileSystemTodoStore{
 		database: &tape{file},
 		todos:    todos,
-	}
+	}, nil
 }
 
 func (f *FileSystemTodoStore) GetTodo(id string) Todo {

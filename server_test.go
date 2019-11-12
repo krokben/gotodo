@@ -107,6 +107,13 @@ func assertDeepEqual(t *testing.T, got, want interface{}) {
 	}
 }
 
+func assertNoError(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatalf("something went wrong, %v", err)
+	}
+}
+
 func createTempFile(t *testing.T, initialData string) (*os.File, func()) {
 	t.Helper()
 

@@ -17,7 +17,7 @@ func NewTodos(rdr io.Reader) (Todos, error) {
 	var todos Todos
 	err := json.NewDecoder(rdr).Decode(&todos)
 	if err != nil {
-		err = fmt.Errorf("problem parsing league, %v", err)
+		err = fmt.Errorf("problem parsing todos, %v", err)
 	}
 
 	return todos, err

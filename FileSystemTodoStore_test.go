@@ -9,7 +9,8 @@ func TestFileSystemTodoStore(t *testing.T) {
 			{"id": "id2", "task": "buy snacks"}]`)
 		defer cleanDatabase()
 
-		store := NewFileSystemTodoStore(database)
+		store, err := NewFileSystemTodoStore(database)
+		assertNoError(t, err)
 
 		got := store.GetTodos()
 		want := Todos{
@@ -29,7 +30,8 @@ func TestFileSystemTodoStore(t *testing.T) {
 			{"id": "id1", "task": "meet friend"}]`)
 		defer cleanDatabase()
 
-		store := NewFileSystemTodoStore(database)
+		store, err := NewFileSystemTodoStore(database)
+		assertNoError(t, err)
 
 		got := store.GetTodo("id1")
 		want := Todo{"id1", "meet friend"}
@@ -42,7 +44,8 @@ func TestFileSystemTodoStore(t *testing.T) {
 			{"id": "id1", "task": "meet friend"}]`)
 		defer cleanDatabase()
 
-		store := NewFileSystemTodoStore(database)
+		store, err := NewFileSystemTodoStore(database)
+		assertNoError(t, err)
 
 		store.AddTodo(Todo{"id7", "go home"})
 
