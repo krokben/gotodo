@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"os"
 )
 
 type FileSystemTodoStore struct {
@@ -11,11 +12,11 @@ type FileSystemTodoStore struct {
 	todos    Todos
 }
 
-func NewFileSystemTodoStore(database io.ReadWriteSeeker) *FileSystemTodoStore {
-	database.Seek(0, 0)
-	todos, _ := NewTodos(database)
+func NewFileSystemTodoStore(file *os.File) *FileSystemTodoStore {
+	file.Seek(0, 0)
+	todos, _ := NewTodos(file)
 	return &FileSystemTodoStore{
-		database: &tape{database},
+		database: &tape{file},
 		todos:    todos,
 	}
 }
