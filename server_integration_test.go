@@ -11,7 +11,7 @@ import (
 func TestTodoServerIntegrationTest(t *testing.T) {
 	database, cleanDatabase := createTempFile(t, "")
 	defer cleanDatabase()
-	store := &FileSystemTodoStore{database}
+	store := NewFileSystemTodoStore(database)
 	server := NewTodoServer(store)
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostRequest(t, "/todos", Todo{"id1", "meet friend"}))
