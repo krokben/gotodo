@@ -57,4 +57,12 @@ func TestFileSystemTodoStore(t *testing.T) {
 
 		assertDeepEqual(t, got, want)
 	})
+
+	t.Run("works with an empty file", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, "")
+		defer cleanDatabase()
+
+		_, err := NewFileSystemTodoStore(database)
+		assertNoError(t, err)
+	})
 }

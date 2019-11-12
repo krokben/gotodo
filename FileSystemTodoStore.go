@@ -14,7 +14,11 @@ type FileSystemTodoStore struct {
 }
 
 func NewFileSystemTodoStore(file *os.File) (*FileSystemTodoStore, error) {
-	file.Seek(0, 0)
+	err := initializeTodoDBFile(file)
+	if err != nil {
+		return nil, fmt.Errorf("problem initialising todo db file, %v", err)
+	}
+
 	todos, err := NewTodos(file)
 	if err != nil {
 		return nil, fmt.Errorf("problem loading todo store from file %s, %v", file.Name(), err)
@@ -41,4 +45,19 @@ func (f *FileSystemTodoStore) AddTodo(todo Todo) {
 	if err != nil {
 		log.Fatal("Could not encode into JSON", err)
 	}
+}
+
+func initializeTodoDBFile(file *os.File) error {
+	file.Seek(0, 0)
+	info, err := file.Stat()
+	if err != nil {
+		return fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
+	}
+
+	if info.Size() == 0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, 0)
+	}
+
+	return nil
 }
