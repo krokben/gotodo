@@ -9,7 +9,10 @@ import (
 )
 
 func TestTodoServerIntegrationTest(t *testing.T) {
-	server := NewTodoServer(&StubTodoStore{})
+	database, cleanDatabase := createTempFile(t, "")
+	defer cleanDatabase()
+	store := &FileSystemTodoStore{database}
+	server := NewTodoServer(store)
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostRequest(t, "/todos", Todo{"id1", "meet friend"}))
 	server.ServeHTTP(httptest.NewRecorder(), newPostRequest(t, "/todos", Todo{"id2", "buy snacks"}))

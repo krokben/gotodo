@@ -70,7 +70,7 @@ func TestTodoServer(t *testing.T) {
 	})
 }
 
-func TestFilSystemTodoStore(t *testing.T) {
+func TestFileSystemTodoStore(t *testing.T) {
 	t.Run("GET todos", func(t *testing.T) {
 		database, cleanDatabase := createTempFile(t, `[
 			{"id": "id1", "task": "meet friend"},
